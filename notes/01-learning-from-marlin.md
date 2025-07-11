@@ -1,4 +1,4 @@
-# Learning from Marlin
+# Learning from Marlin (2025-07-10)
 
 I know almost nothing about the Ender 3 hardware! Luckily, the 3D printer
 firmware is open source:
