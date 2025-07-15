@@ -118,3 +118,5 @@ a better look up table? That's probably why the provided the one in the header
 file, but it would be nice to include the arduino pin number in addittion to the
 package pin number.
 
+## Pins Solution
+
