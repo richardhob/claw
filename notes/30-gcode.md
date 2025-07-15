@@ -1,6 +1,144 @@
 # Marlin FW GCODE Reference
 
+## G0 - Linear Move
+
+From: https://marlinfw.org/docs/gcode/G000-G001.html
+
+### Related Codes
+
+- [G90 - Absolute Positioning](#g90-absolute-positioning)
+- [G91 - Relative Positioning](#g91-relative-positioning)
+- G2 - Arc or Circle Move
+- G3 - Arc or Circle Move
+- G5 - Bezier Cubic Spline Move
+- M82 - E Absolute
+- M83 - E Relative
+
+### Description
+
+The `G0` and `G1` commands add a linear move to the queue to be performed after
+all previous moves are completed. These commands yield control back to the
+command parser as soon as the move is queued, but they may delay the command
+parser while awaiting a slot in the queue.
+
+A linear move traces a straight line from one point to another, ensuring that
+the specified axes will arrive simultaneously at the given coordinates (by
+linear interpolation). The speed may change over time following an acceleration
+curve, according to the acceleration and jerk settings of the given axes.
+
+A command like `G1 F1000` sets the feedrate for all subsequent moves.
+
+By convention, most G-code generators use `G0` for non-extrusion movements
+(those without the E axis) and `G1` for moves that include extrusion. This is
+meant to allow a kinematic system to, optionally, do a more rapid uninterpolated
+movement requiring much less calculation.
+
+For Cartesians and Deltas the `G0` (rapid linear movement) command is (and must
+be) a direct alias for `G1` (rapid movement). On SCARA machines `G0` does a fast
+non-linear move. Marlin 2.0 introduces an option to maintain a separate default
+feedrate for `G0`. Note: Slicers tend to override firmware feedrates!
+
+------
+
+__**NOTE**__ Coordinates are given in millimeters by default. Units may be set
+to inches by `G20`.
+
+In Relative Mode (`G91`) all coordinates are interpreted as relative, adding
+onto the previous position.
+
+In Extruder Relative Mode (`M83`) the E coordinate is interpreted as relative,
+adding onto the previous E position.
+
+A single linear move may generate several smaller moves to the planner due to
+kinematics and bed leveling compensation. Printing performance can be tuned by
+adjusting segments-per-second.
+
+Developers: Keep using `G0` for non-print moves. It makes G-code more adaptable
+to lasers, engravers, etc.
+
+------
+
+### Usage
+
+```
+G0 [A<pos>] [B<pos>] [C<pos>] [E<pos>] [F<rate>] [S<power>] [U<pos>] [V<pos>] [W<pos>] [X<pos>] [Y<pos>] [Z<pos>]
+G1 [A<pos>] [B<pos>] [C<pos>] [E<pos>] [F<rate>] [S<power>] [U<pos>] [V<pos>] [W<pos>] [X<pos>] [Y<pos>] [Z<pos>] 
+```
+
+| Parameters      | Description                                                            |
+| ----------      | -----------                                                            |
+| [A\<pos\>]      | An absolute or relative coordinate on the A axis (in current units)    |
+| [B\<pos\>]      | An absolute or relative coordinate on the B axis (in current units)    |
+| [C\<pos\>]      | An absolute or relative coordinate on the C axis (in current units)    |
+| [E\<pos\>]      | An absolute or relative coordinate on the E axis (in current units)    |
+| [U\<pos\>]      | An absolute or relative coordinate on the U axis (in current units)    |
+| [V\<pos\>]      | An absolute or relative coordinate on the V axis (in current units)    |
+| [W\<pos\>]      | An absolute or relative coordinate on the W axis (in current units)    |
+| [X\<pos\>]      | An absolute or relative coordinate on the X axis (in current units)    |
+| [Y\<pos\>]      | An absolute or relative coordinate on the Y axis (in current units)    |
+| [Z\<pos\>]      | An absolute or relative coordinate on the Z axis (in current units)    |
+| [F\<rate\>]     | Set the requested movement rate for this move and any following moves  |
+| [S\<power\>]    | Set the laser power for the move                                       |
+
+### Examples
+
+Move to 12mm on the X axis:
+
+```
+G0 X11
+```
+
+Set the feedrate to 1500 mm/min:
+
+```
+G0 F1500
+```
+
+Move to 90.6mm on the X axis and 12.8mm on the Y axis:
+
+```
+G0 X90.6 Y12.8
+```
+
+## G90 - Absolute Positioning
+
+From: https://marlinfw.org/docs/gcode/G090.html
+
+### Description
+
+In absolute mode all coordinates given in G-code are interpreted as positions in
+the logical coordinate space. This includes the extruder position unless
+overridden by `M83 - E Relative`.
+
+__**NOTE**__ Absolute positioning is the default.
+
+### Example
+
+Enable Absolute Mode:
+
+```
+G90
+```
+
+## G91 - Relative Positioning
+
+### Description
+
+Set relative position mode. In this mode all coordinates are interpreted as
+relative to the last position. This includes the extruder position unless
+overridden by `M82 - E Absolute`.
+
+### Example
+
+Enable Relative Mode:
+
+```
+G91
+```
+
 ## G4 - Dwell
+
+From: https://marlinfw.org/docs/gcode/G004.html
 
 ### Related Codes
 
@@ -40,6 +178,8 @@ G4 P500
 ```
 
 ## G28 - Auto Home
+
+From: https://marlinfw.org/docs/gcode/G028.html
 
 ### Description
 
@@ -119,6 +259,8 @@ G28 O
 ```
 
 ## M400 - Finish Moves
+
+From: https://marlinfw.org/docs/gcode/M400.html
 
 ### Related Codes
 

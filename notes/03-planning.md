@@ -3,36 +3,24 @@
 Let's finish our investigation of the firmware and make a plan for the claw
 game.
 
-## UI
-
-The User interface seems to be managed by `Marlin/src/lcd/marlinui.cpp`
-
-## Features we could exploit
-
-- Joy stick (Do we have the pins?)
-- Disable SD Card
-- Enable Serial
-- Disable Heaters?
-- Disable 
-
 ## Goal of this project
 
 Make a Claw game, which can be coin operated (eventually). Features are as
 follows:
 
 - Button to say start 
-- Count down timer on start
-- Button to say "go" (can be same as start button)
+- Count down timer on start? (May require a custom hardware / software solution)
+- Button to say "grab" (can be same as start button)
 - Joystick to control position
 
 I think this can work by:
 
 1. Removing Thermistor connections (I think they're analog / ADC In connections)
-2. Connecting up a joy stick 
+2. Connecting up a joy stick to the removed thermistor connections
+3. Connect a button to the Extruder Fan Pin (Start Button)
+4. Connect a button to the CPU Fan Pin (Drop Button)
 
-Pretty simple?
-
-## Joystick
+### Joystick
 
 Using an analog joystick, we can control the printer:
 
@@ -58,7 +46,7 @@ joy stick requires a 5V input:
 
 ![Joy Stick Module](images/Joystick-Module-Pinout.png)
 
-## Custom Buttons
+### Custom Buttons
 
 From [Stack Overflow](https://3dprinting.stackexchange.com/questions/18015/how-to-add-custom-physical-buttons-to-a-3d-printer-in-marlin-software):
 
@@ -101,4 +89,64 @@ in the configuration file, and choose a hardware button to use.
 #endif
 ```
 
+Assuming that the joystick will NOT work if the machine is locked, for the
+"Start" button, all we need to do is unlock the machine. Optionally we can play
+some sounds using the speaker, but that is not required for basic functionality:
 
+``` cpp
+
+#define CUSTOM_USER_BUTTONS
+
+// TODO: Find the buttons to use for these
+#define START_BUTTON (xxx)
+#define START_GCODE  "M511"
+#define START_DESC   "Start Button"
+
+#define BUTTON1_PIN START_BUTTON
+
+#define BUTTON1_HIT_STATE     LOW       // State of the triggered button. NC=LOW. NO=HIGH.
+#define BUTTON1_WHEN_PRINTING false     // Button allowed to trigger during printing?
+#define BUTTON1_GCODE         START_GCODE
+#define BUTTON1_DESC          START_DESC
+```
+
+The Drop button is pretty simple too:
+
+1. Configure for relative movement
+1. Drop Z (X mm)
+1. Grab (Run E motor basically)
+1. Retract Z (Home Z)
+1. Home X Y
+1. UnGrab (Run E motor backwards)
+1. Disable Joystick (Lock?)
+
+``` cpp
+// Custom Variables
+#define DROP_HEIGHT (100) // mm
+#define GRAB_AMOUNT (10)  // mm
+
+#define DROP_BUTTON (xxx)
+#define DROP_GCODE  "G91\n \
+                    "G0 Z" STRINGIFY(DROP_HEIGHT) "\n" \
+                    "G0 E" STRINGIFY(GRAB_AMOUNT) "\n" \
+                    "G28 Z\n" \
+                    "G28 X Y\n" \
+                    "G0 E-" STRINGIFY(GRAB_AMOUNT) \
+                    "M510\n" \ 
+#define DROP_DESC   "Drop Button"
+
+#define BUTTON2_PIN DROP_BUTTON 
+
+#define BUTTON2_HIT_STATE     LOW
+#define BUTTON2_WHEN_PRINTING false
+#define BUTTON2_GCODE         START_GCODE
+#define BUTTON2_DESC          START_DESCRIPTION
+```
+
+### Questions
+
+- Q: Does the Joystick work if the machine is locked?
+- Q: Can G code be negative? is it just `X-100` ?
+    - Yeah basically, the internet (reprap forum) said as much
+- Q: Can I create a Custom Print Timer GCode to "time out"?
+- Q: Can I control a servo using the Stepper HBRIDGE? (Probably not)
