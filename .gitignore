@@ -1,2 +1,4 @@
 libs/
 *.swp
+pytest-env/
+__pycache__/

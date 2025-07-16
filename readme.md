@@ -6,21 +6,14 @@ game from an (extra) Ender 3 printer I have lying around.
 ## Software Required for development
 
 - [PlatformIO](https://platformio.org/)
-- Make (for Unit tests)
-- GCC (for Unit test)
-- Unity by Throw The Switch (for Unit Tests)
+- Make 
 
-## Marlin PlatformIO Cheat Sheet
+## Build the firmware
 
-For more CLI information, see the [User Guide](https://docs.platformio.org/en/latest/core/index.html)
+``` bash
+> make 
+```
 
-| FUNCTION      | COMMAND                                        |
-| --------      | -------                                        |
-| PIO Build     | platformio run -e melzi                        |
-| PIO Clean     | platformio run --target clean -e melzi         |
-| PIO Upload    | platformio run --target upload -e melzi        |
-| PIO Traceback | platformio run --target upload -e melzi        |
-| PIO Program   | platformio run --target program -e melzi       |
-| PIO Test      | platformio test upload -e melzi                |
-| PIO Remote    | platformio remote run --target upload -e melzi |
-| PIO Debug     | platformio debug -e melzi                      |
+## Details
+
+
