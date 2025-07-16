@@ -46,6 +46,19 @@ joy stick requires a 5V input:
 
 ![Joy Stick Module](images/Joystick-Module-Pinout.png)
 
+The Joy stick pins are as follows:
+
+| Pin | Description                       |
+| --- | -----------                       |
+| GND | Ground Connection                 |
+| VCC | Voltage                           |
+| VRx | X output from Potentiometer       |
+| VRy | Y output from Potentiometer       |
+| SW  | Internal Switch output            |
+
+The `VRx` and `VRy` output are from Potentiometers. We should be able to figure
+out what pins they are using a DMM.
+
 ### Custom Buttons
 
 From [Stack Overflow](https://3dprinting.stackexchange.com/questions/18015/how-to-add-custom-physical-buttons-to-a-3d-printer-in-marlin-software):

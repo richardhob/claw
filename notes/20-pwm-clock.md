@@ -1,7 +1,11 @@
-# Generic Timer
+# Generic Timer (Wont' Work)
 
-We can potentially use the PWM for the FAN for the timer, by settings the
-`FAST_PWM_FAN` frequency:
+I wrote this bit thinking this _might_ work... but it probably won't without
+Interrupts. The main problem with the GCODE is that the GCODE command has to
+resolve before the next one can execute. So having things like "do this while
+this other thing is happening" is not possible. Sad!
+
+Anways, here's some notes on the PWM and FAN settings!
 
 ## Fast PWM Fan Frequency Scaling
 
