@@ -1,6 +1,8 @@
 
 import sys
 import ctypes
+import argparse
+
 import dwfconstants 
 
 # CLI Application which can be used to set the output voltage on either (or
@@ -14,11 +16,11 @@ c_true = ctypes.c_int(1)
 def get_dll():
     ''' Get the DLL based on the system (copied from DWF example) '''
     if sys.platform.startswith("win"):
-        dwf = cdll.dwf
+        dwf = ctypes.cdll.dwf
     elif sys.platform.startswith("darwin"):
-        dwf = cdll.LoadLibrary("/Library/Frameworks/dwf.framework/dwf")
+        dwf = ctypes.cdll.LoadLibrary("/Library/Frameworks/dwf.framework/dwf")
     else:
-        dwf = cdll.LoadLibrary("libdwf.so")
+        dwf = ctypes.cdll.LoadLibrary("libdwf.so")
 
     return dwf
 
@@ -28,6 +30,15 @@ def get_device(dll, device_id=-1):
     device_obj = ctypes.c_int()
     dll.FDwfDeviceOpen(device_id, ctypes.byref(device_obj))
     return device_obj
+
+def dll_set_param(dll, param, value):
+    ''' Configure a DLL parameter.
+
+    Example: Configure the device to continue running on close
+
+    >>> dll_set_param(dll, dwfconstants.DwfParamOnClose, ctypes.c_int(0))
+    '''
+    dll.FDwfParamSet(param, value)
 
 def set_voltage(dll, device, channel, voltage):
     ''' Set the output voltage on the provided channel 
@@ -51,10 +62,28 @@ def set_voltage(dll, device, channel, voltage):
 
 def close(dll, device):
     ''' Properly shut down the device. '''
-    pass
+    dll.FDwfDeviceClose(device)
 
-def main():
-    pass
+def main(args):
+    dll = get_dll()
+
+    # 0 continue, 1 stop, 2 shutdown
+    dll_set_param(dll, dwfconstants.DwfParamOnClose, ctypes.c_int(0))
+
+    # Not sure if I need this one - 0 disable, 1 enable
+    dll_set_param(dll, dwfconstants.DwfParamAnalogOut, ctypes.c_int(1))
+
+    device = get_device(dll, args.device)
+    set_voltage(dll, device, args.channel, args.voltage)
+
+def parse():
+    parser = argparse.ArgumentParser("")
+    parser.add_argument("channel", help="Channel to configure. -1, 0, 1 (-1 for both)", type=int)
+    parser.add_argument("voltage", help="Voltage to set (0 to 5 V)", type=float)
+    parser.add_argument("--device", help="Device ID. Default is -1 (first found device)", type=int)
+    args = parser.parse_args()
+    return args
 
 if __name__ == '__main__':
-    main()
+    args = parse()
+    main(args)
