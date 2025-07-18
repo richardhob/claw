@@ -9,12 +9,26 @@ LIB_DIR := libs
 MARLIN  := libs/Marlin
 FIRMWARE := $(MARLIN)/.pio/build/melzi/firmware.elf
 PLATFORMIO := ~/.platformio/penv/bin/pio
+UDEV_RULES := /etc/udev/rules.d/99-platformio-udev.rules
 
 PY_SRC := scripts/set_voltage.py scripts/test/test_set_voltage.py
 PYTEST := ./pytest-env/bin/pytest
 
 .PHONY: all
 all: $(FIRMWARE)
+
+.PHONY: program
+program: $(HEADERS) | $(UDEV_RULES)
+	cd $(MARLIN); $(PLATFORMIO) run --target upload -e melzi
+
+$(UDEV_RULES):
+	@echo "Please install the UDEV rules (https://docs.platformio.org/en/latest/core/installation/udev-rules.html)"
+	@echo ""
+	@echo "1. curl -fsSL https://raw.githubusercontent.com/platformio/platformio-core/develop/platformio/assets/system/99-platformio-udev.rules | 99-platformio-udev.rules"
+	@echo "2. sudo mv 99-platformio-udev.rules $(UDEV_RULES)"
+	@echo "3. sudo service udev restart"
+	@echo "4. Disconnect and Reconnect the board"
+	@exit 10
 
 ## Marlin PlatformIO Cheat Sheet
 # 
